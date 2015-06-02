@@ -3,267 +3,128 @@ function flow_boat(pos,object)
 	local y = 0
 	local z = 0
 	local velocity = object:getvelocity()
-	local param2 = minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).param2
+	local pos = {x=math.floor(pos.x+0.5),y=math.floor(pos.y+0.5),z=math.floor(pos.z+0.5)}
 	local node   = minetest.get_node({x=pos.x,y=pos.y,z=pos.z})
+	local param2 = node.param2
 
-	if param2 > 8 then
-		param2 = param2 - 9
-	end
 
-	--use this to copy
-	if minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name == "default:water_flowing" and minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).param2 < param2 then
-		x = x 
-		y = y 
-		z = z 
-	end
+
 
 
 	--check for flowing water (This is insane)
-	--plus x
-	local param22 = minetest.get_node({x=pos.x+1,y=pos.y,z=pos.z}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
+
+	
+	--make an assumption that source is actually water level 8
+	if node.name == "default:water_source" then
+		param2 = 8
 	end
-	if minetest.get_node({x=pos.x+1,y=pos.y,z=pos.z}).name == "default:water_flowing" and param22 < param2 then
-		x = x + 1
-		y = y
-		z = z
-	elseif minetest.get_node({x=pos.x+1,y=pos.y,z=pos.z}).name == "default:water_flowing" and param22 > param2 then
-		x = x - 1
-		y = y
-		z = z
-	end
-	local param22 = minetest.get_node({x=pos.x+1,y=pos.y,z=pos.z - 1}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x+1,y=pos.y,z=pos.z-1}).name == "default:water_flowing" and param22 < param2 then
-		x = x + 1
-		y = y
-		z = z - 1
-	elseif minetest.get_node({x=pos.x+1,y=pos.y,z=pos.z-1}).name == "default:water_flowing" and param22 > param2 then
-		x = x - 1
-		y = y
-		z = z + 1
-	end
-	local param22 = minetest.get_node({x=pos.x+1,y=pos.y,z=pos.z + 1}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x+1,y=pos.y,z=pos.z+1}).name == "default:water_flowing" and param22 < param2 then
-		x = x + 1
-		y = y
-		z = z + 1
-	elseif minetest.get_node({x=pos.x+1,y=pos.y,z=pos.z+1}).name == "default:water_flowing" and param22 > param2 then
-		x = x - 1
-		y = y
-		z = z - 1
+	--correct internal param2
+	if param2 > 8 then
+		--print("correcting")
+		param2 = param2 - 8
 	end
 
-	-------
-	--minus x
-	local param22 =  minetest.get_node({x=pos.x-1,y=pos.y,z=pos.z}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x-1,y=pos.y,z=pos.z}).name == "default:water_flowing" and param22 < param2 then
-		x = x - 1
-		y = y 
-		z = z
-	elseif minetest.get_node({x=pos.x-1,y=pos.y,z=pos.z}).name == "default:water_flowing" and param22 > param2 then
-		x = x + 1
-		y = y 
-		z = z 
-	end
-	local param22 = minetest.get_node({x=pos.x-1,y=pos.y,z=pos.z-1}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x-1,y=pos.y,z=pos.z-1}).name == "default:water_flowing" and param22 < param2 then
-		x = x -1
-		y = y 
-		z = z -1
-	elseif minetest.get_node({x=pos.x-1,y=pos.y,z=pos.z-1}).name == "default:water_flowing" and param22 < param2 then
-		x = x +1
-		y = y 
-		z = z +1
-	end
-	local param22 = minetest.get_node({x=pos.x-1,y=pos.y,z=pos.z+1}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x-1,y=pos.y,z=pos.z+1}).name == "default:water_flowing" and param22 < param2 then
-		x = x -1
-		y = y 
-		z = z +1
-	elseif minetest.get_node({x=pos.x-1,y=pos.y,z=pos.z+1}).name == "default:water_flowing" and param22 < param2 then
-		x = x +1
-		y = y 
-		z = z -1
+	if minetest.get_item_group(node.name, "water") ~= 0 then
+		for a = -1,1 do
+			for b = -1,0 do
+				for c = -1,1 do
+					local node2    = minetest.get_node({x=pos.x+a,y=pos.y+b,z=pos.z+c})
+					local param22 = node2.param2
+
+					--correct small blocks becoming sources and  water quirks
+					--if parm22 == 240 then
+					--	param22 = 8
+					--end
+					if param22 > 8 then
+						param22 = param22 - 8
+					end
+					--print(param22)
+					if node2.name == "default:water_flowing" and param22 < param2 then
+						--this is pull
+						--print("param22:"..param22.." | param2:"..param2)
+						x = x + (a )
+						y = y - (b )
+						z = z + (c )
+					elseif node2.name == "default:water_flowing" and param22 > param2 then
+					--	--this is push	
+						--print("param22:"..param22.." | param2:"..param2)
+						x = x - (a )
+						y = y + (b )
+						z = z - (c )			
+					end		
+				end
+			end
+			
+		end
+		--print(x..' '..y.. ' '..z)
+		--print(dump(node))
+		object:setacceleration({x=x,y=y,z=z})
+	--elseif minetest.get_item_group(minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z}).name, "water") ~= 0 then
+	--	object:setvelocity({x=0,y=0,z=0})
+	--	object:setacceleration({x=0,y=0,z=0})
 	end
 	
-	-----
-	--z
-	local param22 = minetest.get_node({x=pos.x,y=pos.y,z=pos.z-1}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x,y=pos.y,z=pos.z-1}).name == "default:water_flowing" and param22 < param2 then
-		x = x 
-		y = y 
-		z = z -1
-	elseif minetest.get_node({x=pos.x,y=pos.y,z=pos.z-1}).name == "default:water_flowing" and param22 < param2 then
-		x = x 
-		y = y 
-		z = z +1
-	end
-
-	local param22 = minetest.get_node({x=pos.x,y=pos.y,z=pos.z+1}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
+	--make it float
+	if minetest.get_item_group(node.name, "water") ~= 0 and y == 0 then
+		object:setacceleration({x=x,y=10,z=z})
 	end
 	
-	--print(param22)
-	if minetest.get_node({x=pos.x,y=pos.y,z=pos.z+1}).name == "default:water_flowing" and param22 < param2 then
-		x = x 
-		y = y 
-		z = z +1
-	elseif minetest.get_node({x=pos.x,y=pos.y,z=pos.z+1}).name == "default:water_flowing" and param22 < param2 then
-		x = x 
-		y = y 
-		z = z -1
+	--make it not fly away
+	if minetest.get_item_group(minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name, "water") == 0 then
+		object:setacceleration({x=x,y=-10,z=z})
 	end
-
-	--NOW check below!
-
-	--plus x
-	--if minetest.get_node(pos).name ~= "air" then
-	local param22 = minetest.get_node({x=pos.x+1,y=pos.y-1,z=pos.z}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x+1,y=pos.y-1,z=pos.z}).name == "default:water_flowing" and param22 > param2 then
-		x = x+ 1
-		y = y-1
-		z = z
-	elseif minetest.get_node({x=pos.x+1,y=pos.y-1,z=pos.z}).name == "default:water_flowing" and param22 < param2 then
-		x = x- 1
-		y = y-1
-		z = z
-	end
-	local param22 = minetest.get_node({x=pos.x+1,y=pos.y-1,z=pos.z - 1}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x+1,y=pos.y-1,z=pos.z-1}).name == "default:water_flowing" and param22 > param2 then
-		x = x + 1
-		y = y-1
-		z = z - 1
-	elseif minetest.get_node({x=pos.x+1,y=pos.y-1,z=pos.z-1}).name == "default:water_flowing" and param22 < param2 then
-		x = x - 1
-		y = y-1
-		z = z + 1
-	end
-	local param22 = minetest.get_node({x=pos.x+1,y=pos.y-1,z=pos.z + 1}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x+1,y=pos.y-1,z=pos.z+1}).name == "default:water_flowing" and param22 > param2 then
-		x = x + 1
-		y = y-1
-		z = z + 1
-	elseif minetest.get_node({x=pos.x+1,y=pos.y-1,z=pos.z+1}).name == "default:water_flowing" and param22 < param2 then
-		x = x - 1
-		y = y-1
-		z = z - 1
-	end
-	-------
-	--minus x
-	local param22 = minetest.get_node({x=pos.x-1,y=pos.y-1,z=pos.z}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x-1,y=pos.y-1,z=pos.z}).name == "default:water_flowing" and param22 > param2 then
-		x = x - 1
-		y = y -1
-		z = z 
-	elseif minetest.get_node({x=pos.x-1,y=pos.y-1,z=pos.z}).name == "default:water_flowing" and param22 < param2 then
-		x = x + 1
-		y = y -1
-		z = z 
-	end
-	local param22 = minetest.get_node({x=pos.x-1,y=pos.y-1,z=pos.z-1}).param2 
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x-1,y=pos.y-1,z=pos.z-1}).name == "default:water_flowing" and param22 > param2 then
-		x = x -1
-		y = y -1
-		z = z -1
-	elseif minetest.get_node({x=pos.x-1,y=pos.y-1,z=pos.z-1}).name == "default:water_flowing" and param22 < param2 then
-		x = x +1
-		y = y -1
-		z = z +1
-	end	
-	local param22 = minetest.get_node({x=pos.x-1,y=pos.y-1,z=pos.z+1}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x-1,y=pos.y-1,z=pos.z+1}).name == "default:water_flowing" and param22 > param2 then
-		x = x -1
-		y = y -1
-		z = z +1
-	elseif minetest.get_node({x=pos.x-1,y=pos.y-1,z=pos.z+1}).name == "default:water_flowing" and param22 < param2 then
-		x = x +1
-		y = y -1
-		z = z -1
-	end
-
-	-----
-	--z
-	local param22 = minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z-1}).param2 
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z-1}).name == "default:water_flowing" and param22 > param2 then
-		x = x 
-		y = y -1
-		z = z -1
-	elseif minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z-1}).name == "default:water_flowing" and param22 < param2 then
-		x = x 
-		y = y -1
-		z = z +1
-	end
-
-	local param22 = minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z+1}).param2
-	if param22 > 8 then
-		param22 = param22 - 9
-	end
-	if minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z+1}).name == "default:water_flowing" and param22 > param2  then
-		x = x 
-		y = y -1
-		z = z +1
-	elseif minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z+1}).name == "default:water_flowing" and param22 < param2  then
-		x = x 
-		y = y -1
-		z = z -1
+	
+	--beach it
+	if minetest.get_item_group(node.name, "water") == 0 and minetest.registered_nodes[minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z}).name].walkable == true then
+		object:setacceleration({x=0,y=-10,z=0})
+		object:setvelocity({x=0,y=velocity.y,z=0})
 	end
 
 
 
 
-	YOU NEED TO CREATE A THIRD ROW FOR +1 Y1!!!!!
 
 
-	ADD THE PARAMETER 2 TO THE AXISES INSTEAD OF 1!!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	--YOU NEED TO CREATE A THIRD ROW FOR +1 Y1!!!!!
+
+
+	--ADD THE PARAMETER 2 TO THE AXISES INSTEAD OF 1!!!
 
 
 
 
 
 	--end
-	object:setacceleration({x=x,y=y,z=z})
-
+	
+	--[[
 	--beach the boat
 	if minetest.registered_nodes[minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z}).name].walkable == true and minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name == "air" then
 	--	print("stuck")
@@ -286,6 +147,17 @@ function flow_boat(pos,object)
 	--end
 	--print(x.." "..y.." "..z)
 	--print(dump(node))
+	if param2 > 8 then
+		param2 = param2 - 9
+	end
+
+	--use this to copy
+	if minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name == "default:water_flowing" and minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).param2 < param2 then
+		x = x 
+		y = y 
+		z = z 
+	end
+	]]--
 	
 end
 
@@ -306,26 +178,6 @@ function boat.on_step(self, dtime)
 	local pos = self.object:getpos()
 	flow_boat(pos,self.object)
 	--self.object:setvelocity(flow)
-	
-	--[[
-	if minetest.get_item_group(nn.name, "water") ~= 0 then
-		if nn.name == "default:water_source" then
-			if velocity.x == 0 and velocity.y == 0 then
-				if pos.x ~= center.x and pos.z ~= center.z then
-					print("pass")
-				end
-			end
-		elseif nn.name == "default:water_flowing" then
-			
-		end
-	else
-
-			self.object:setacceleration({x=0,y=0,z=0})	
-			self.object:setvelocity({x=0,y=0,z=0})	
-	end
-	]]--
-	--print(" "..(dump(nn)))
-	--get center of block if on source node and then try to move towards the node that it's closest to
 end
 
 minetest.register_entity("boat:boat", boat)
@@ -380,8 +232,9 @@ minetest.register_craftitem("boat:boat", {
 minetest.register_craftitem("boat:infostick", {
 	description = "Boat boat boat",
 	inventory_image = "default_stick.png",
+	liquids_pointable = true,
 	on_place = function(itemstack, placer, pointed_thing)
-		print(minetest.get_node(pointed_thing.above).param2)
+		print(minetest.get_node(pointed_thing.under).param2)
 	end,
 })
 
