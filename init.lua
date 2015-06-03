@@ -9,10 +9,10 @@ function flow_boat(pos,object)
 	local y = 0
 	local z = 0
 	local velocity = object:getvelocity()
+	local realpos = pos
 	local pos = {x=math.floor(pos.x+0.5),y=math.floor(pos.y+0.5),z=math.floor(pos.z+0.5)}
 	local node   = minetest.get_node({x=pos.x,y=pos.y,z=pos.z})
 	local param2 = node.param2
-
 
 
 	--this code is extremely inefficient
@@ -75,25 +75,80 @@ function flow_boat(pos,object)
 	--make it float
 	if minetest.get_item_group(node.name, "water") ~= 0 and y == 0 then
 		if object:get_luaentity().in_water == false then
-			print(dump(velocity.y))
+			--do sounds and particles for water bounces
 			if velocity.y < 0 and velocity.y > -3 then
 				minetest.sound_play("soft_splash", {
 					pos = {object:getpos()},
-					max_hear_distance = 15,
+					max_hear_distance = 20,
 					gain = 0.01,
 				})
+				minetest.add_particlespawner({
+					amount = 10,
+					time = 1,
+					minpos = {x=realpos.x-1, y=realpos.y, z=realpos.z-1},
+					maxpos = {x=realpos.x+1, y=realpos.y, z=realpos.z+1},
+					minvel = {x=0, y=0, z=0},
+					maxvel = {x=0, y=0, z=0},
+					minacc = {x=0, y=0, z=0},
+					maxacc = {x=0, y=1, z=0},
+					minexptime = 1,
+					maxexptime = 1,
+					minsize = 1,
+					maxsize = 1,
+					collisiondetection = false,
+					vertical = false,
+					texture = "bubble.png",
+				})
+
+
 			elseif velocity.y <= -3 and velocity.y > -10 then
 				minetest.sound_play("medium_splash", {
 					pos = {object:getpos()},
-					max_hear_distance = 15,
+					max_hear_distance = 20,
 					gain = 0.05,
 				})
+				minetest.add_particlespawner({
+					amount = 15,
+					time = 1,
+					minpos = {x=realpos.x-1, y=realpos.y, z=realpos.z-1},
+					maxpos = {x=realpos.x+1, y=realpos.y, z=realpos.z+1},
+					minvel = {x=0, y=0, z=0},
+					maxvel = {x=0, y=0, z=0},
+					minacc = {x=0, y=0, z=0},
+					maxacc = {x=0, y=2, z=0},
+					minexptime = 1,
+					maxexptime = 1,
+					minsize = 1,
+					maxsize = 1,
+					collisiondetection = false,
+					vertical = false,
+					texture = "bubble.png",
+				})
+
 			elseif velocity.y <= -10 then
 				minetest.sound_play("big_splash", {
 					pos = {object:getpos()},
-					max_hear_distance = 15,
+					max_hear_distance = 20,
 					gain = 0.07,
-				})			
+				})
+				minetest.add_particlespawner({
+					amount = 20,
+					time = 0.5,
+					minpos = {x=realpos.x-1, y=realpos.y, z=realpos.z-1},
+					maxpos = {x=realpos.x+1, y=realpos.y, z=realpos.z+1},
+					minvel = {x=0, y=0, z=0},
+					maxvel = {x=0, y=0, z=0},
+					minacc = {x=0, y=0, z=0},
+					maxacc = {x=0, y=3, z=0},
+					minexptime = 1,
+					maxexptime = 1,
+					minsize = 1,
+					maxsize = 1,
+					collisiondetection = false,
+					vertical = false,
+					texture = "bubble.png",
+				})
+			
 			end
 		end
 		object:get_luaentity().in_water = true
