@@ -12,7 +12,7 @@ function flow_boat(pos,object)
 
 
 
-
+	--this code is extremely inefficient
 
 	--check for flowing water (This is insane)
 
@@ -26,7 +26,6 @@ function flow_boat(pos,object)
 
 
 	if minetest.get_item_group(node.name, "water") ~= 0 then
-		print("test")
 		for a = -1,1 do
 			for b = -1,0 do
 				for c = -1,1 do
@@ -58,7 +57,7 @@ function flow_boat(pos,object)
 						x = x - (a )
 						y = y - (b *4)
 						z = z - (c )			
-					end		
+					end
 				end
 			end
 			
@@ -71,6 +70,10 @@ function flow_boat(pos,object)
 	--make it float
 	if minetest.get_item_group(node.name, "water") ~= 0 and y == 0 then
 		object:setacceleration({x=x,y=4,z=z})
+		--slow down boats that fall into water smoothly
+		if velocity.y < 0 then
+			object:setacceleration({x=x,y=10,z=z})
+		end
 	end
 	
 	--make it fall when not in water
