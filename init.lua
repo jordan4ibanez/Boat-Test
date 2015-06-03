@@ -1,4 +1,7 @@
 function flow_boat(pos,object)
+
+	--need to get y - 2 or 2 y nodes below
+
 	local x = 0
 	local y = 0
 	local z = 0
@@ -13,29 +16,33 @@ function flow_boat(pos,object)
 
 	--check for flowing water (This is insane)
 
+	--MODIFY THE PARAM2 IF NODE IS SOURCE OR IF NODE IS FLOWING WATER WITH FLOWING WATER BELOW IT (NEEDS TO SUBTRACT 8)
 	
-	--make an assumption that source is actually water level 8
+
+	--if you're in a source make the param2 corrilate with flowing
 	if node.name == "default:water_source" then
 		param2 = 8
 	end
-	--correct internal param2
-	if param2 > 8 then
-		--print("correcting")
-		param2 = param2 - 8
-	end
+
 
 	if minetest.get_item_group(node.name, "water") ~= 0 then
+		print("test")
 		for a = -1,1 do
 			for b = -1,0 do
 				for c = -1,1 do
 					local node2    = minetest.get_node({x=pos.x+a,y=pos.y+b,z=pos.z+c})
+					local node3    = minetest.get_node({x=pos.x+a,y=pos.y+b-1,z=pos.z+c}) --check for flowing water below
+					local node4    = minetest.get_node({x=pos.x+a,y=pos.y+b+1,z=pos.z+c}) --check for flowing water above
 					local param22 = node2.param2
+					local invert_y = false
 
-					--correct small blocks becoming sources and  water quirks
-					--if parm22 == 240 then
-					--	param22 = 8
-					--end
-					if param22 > 8 then
+					--do this for continuity
+					if node2.name == "default:water_flowing" and node3.name == "default:water_flowing" then
+						param22 = param22 - 8
+					end
+					--repair the flying away
+					if node2.name == "default:water_flowing" and node4.name == "default:water_flowing" then
+						--print("let's stop it from flying away")
 						param22 = param22 - 8
 					end
 					--print(param22)
@@ -43,33 +50,30 @@ function flow_boat(pos,object)
 						--this is pull
 						--print("param22:"..param22.." | param2:"..param2)
 						x = x + (a )
-						y = y - (b )
+						y = y + (b *4)
 						z = z + (c )
 					elseif node2.name == "default:water_flowing" and param22 > param2 then
-					--	--this is push	
+						--this is push	
 						--print("param22:"..param22.." | param2:"..param2)
 						x = x - (a )
-						y = y + (b )
+						y = y - (b *4)
 						z = z - (c )			
 					end		
 				end
 			end
 			
 		end
-		--print(x..' '..y.. ' '..z)
-		--print(dump(node))
 		object:setacceleration({x=x,y=y,z=z})
-	--elseif minetest.get_item_group(minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z}).name, "water") ~= 0 then
-	--	object:setvelocity({x=0,y=0,z=0})
-	--	object:setacceleration({x=0,y=0,z=0})
+		--object:setvelocity({x=x,y=y,z=z}) --this is a test to see it's pathfinding
+
 	end
 	
 	--make it float
 	if minetest.get_item_group(node.name, "water") ~= 0 and y == 0 then
-		object:setacceleration({x=x,y=10,z=z})
+		object:setacceleration({x=x,y=4,z=z})
 	end
 	
-	--make it not fly away
+	--make it fall when not in water
 	if minetest.get_item_group(minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name, "water") == 0 then
 		object:setacceleration({x=x,y=-10,z=z})
 	end
@@ -190,6 +194,12 @@ minetest.register_entity("boat:boat", boat)
 
 
 
+--when checking y = + 1 only check above
+
+--make water go negative so that it can't be a giant floating tower of water
+--negative water pulls down water above it, even moving the source block
+
+--This is new water that flows with a fixed param2
 
 
 
@@ -205,6 +215,19 @@ minetest.register_entity("boat:boat", boat)
 
 
 
+
+
+
+
+
+
+
+
+
+local function is_water(pos)
+	local nn = minetest.get_node(pos).name
+	return minetest.get_item_group(nn, "water") ~= 0
+end
 
 
 
@@ -220,7 +243,10 @@ minetest.register_craftitem("boat:boat", {
 		if pointed_thing.type ~= "node" then
 			return
 		end
-		pointed_thing.under.y = pointed_thing.under.y + 0.2
+		--if not is_water(pointed_thing.under) then
+		--	return
+		--end
+		pointed_thing.under.y = pointed_thing.under.y + 1.0
 		pointed_thing.under.y = pointed_thing.under.y
 		minetest.add_entity(pointed_thing.under, "boat:boat")
 		if not minetest.setting_getbool("creative_mode") then
@@ -232,9 +258,9 @@ minetest.register_craftitem("boat:boat", {
 minetest.register_craftitem("boat:infostick", {
 	description = "Boat boat boat",
 	inventory_image = "default_stick.png",
-	liquids_pointable = true,
+	--liquids_pointable = true,
 	on_place = function(itemstack, placer, pointed_thing)
-		print(minetest.get_node(pointed_thing.under).param2)
+		print(minetest.get_node(pointed_thing.above).param2)
 	end,
 })
 
