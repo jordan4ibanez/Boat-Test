@@ -1,3 +1,6 @@
+--remember to make oars or a motor or something
+
+
 function flow_boat(pos,object)
 
 	--need to get y - 2 or 2 y nodes below
@@ -48,15 +51,15 @@ function flow_boat(pos,object)
 					if node2.name == "default:water_flowing" and param22 < param2 then
 						--this is pull
 						--print("param22:"..param22.." | param2:"..param2)
-						x = x + (a )
-						y = y + (b *4)
-						z = z + (c )
+						x = x + (a * param22)
+						y = y + (b * param22)--*4)
+						z = z + (c * param22)
 					elseif node2.name == "default:water_flowing" and param22 > param2 then
 						--this is push	
 						--print("param22:"..param22.." | param2:"..param2)
-						x = x - (a )
-						y = y - (b *4)
-						z = z - (c )			
+						x = x - (a * param22)
+						y = y - (b * param22)--*4)
+						z = z - (c * param22)			
 					end
 				end
 			end
