@@ -102,6 +102,60 @@ local boat = {
 	last_v = 0,
 	removed = false
 }
+
+function boat.on_rightclick(self, clicker)
+	if not clicker or not clicker:is_player() then
+		return
+	end
+	local name = clicker:get_player_name()
+	if self.driver and clicker == self.driver then
+		self.driver = nil
+		clicker:set_detach()
+		default.player_attached[name] = false
+		default.player_set_animation(clicker, "stand" , 30)
+	elseif not self.driver then
+		self.driver = clicker
+		clicker:set_attach(self.object, "", {x = 0, y = 11, z = -3}, {x = 0, y = 0, z = 0})
+		default.player_attached[name] = true
+		minetest.after(0.2, function()
+			default.player_set_animation(clicker, "sit" , 30)
+		end)
+		self.object:setyaw(clicker:get_look_yaw() - math.pi / 2)
+	end
+end
+
+function boat.on_activate(self, staticdata, dtime_s)
+	self.object:set_armor_groups({immortal = 1})
+	if staticdata then
+		self.v = tonumber(staticdata)
+	end
+	self.last_v = self.v
+end
+
+function boat.get_staticdata(self)
+	return tostring(self.v)
+end
+
+function boat.on_punch(self, puncher, time_from_last_punch, tool_capabilities, direction)
+	if not puncher or not puncher:is_player() or self.removed then
+		return
+	end
+	if self.driver and puncher == self.driver then
+		self.driver = nil
+		puncher:set_detach()
+		default.player_attached[puncher:get_player_name()] = false
+	end
+	if not self.driver then
+		self.removed = true
+		-- delay remove to ensure player is detached
+		minetest.after(0.1, function()
+			self.object:remove()
+		end)
+		if not minetest.setting_getbool("creative_mode") then
+			puncher:get_inventory():add_item("main", "boats:boat")
+		end
+	end
+end
 function boat.on_step(self, dtime)
 	local pos = self.object:getpos()
 	flow_boat(pos,self.object)
