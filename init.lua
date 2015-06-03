@@ -74,6 +74,29 @@ function flow_boat(pos,object)
 	
 	--make it float
 	if minetest.get_item_group(node.name, "water") ~= 0 and y == 0 then
+		if object:get_luaentity().in_water == false then
+			print(dump(velocity.y))
+			if velocity.y < 0 and velocity.y > -3 then
+				minetest.sound_play("soft_splash", {
+					pos = {object:getpos()},
+					max_hear_distance = 15,
+					gain = 0.01,
+				})
+			elseif velocity.y <= -3 and velocity.y > -10 then
+				minetest.sound_play("medium_splash", {
+					pos = {object:getpos()},
+					max_hear_distance = 15,
+					gain = 0.05,
+				})
+			elseif velocity.y <= -10 then
+				minetest.sound_play("big_splash", {
+					pos = {object:getpos()},
+					max_hear_distance = 15,
+					gain = 0.07,
+				})			
+			end
+		end
+		object:get_luaentity().in_water = true
 		object:setacceleration({x=x,y=4,z=z})
 		--slow down boats that fall into water smoothly
 		if velocity.y < 0 then
@@ -83,11 +106,13 @@ function flow_boat(pos,object)
 	
 	--make it fall when not in water
 	if minetest.get_item_group(minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name, "water") == 0 then
+		object:get_luaentity().in_water = false
 		object:setacceleration({x=x,y=-10,z=z})
 	end
 	
 	--beach it
 	if minetest.get_item_group(node.name, "water") == 0 and minetest.registered_nodes[minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z}).name].walkable == true then
+		object:get_luaentity().in_water = false
 		object:setacceleration({x=0,y=-10,z=0})
 		object:setvelocity({x=0,y=velocity.y,z=0})
 	end
@@ -105,7 +130,8 @@ local boat = {
 	driver = nil,
 	v = 0,
 	last_v = 0,
-	removed = false
+	removed = false,
+	in_water = false,
 }
 
 function boat.on_rightclick(self, clicker)
