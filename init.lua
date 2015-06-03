@@ -86,85 +86,6 @@ function flow_boat(pos,object)
 		object:setacceleration({x=0,y=-10,z=0})
 		object:setvelocity({x=0,y=velocity.y,z=0})
 	end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	--YOU NEED TO CREATE A THIRD ROW FOR +1 Y1!!!!!
-
-
-	--ADD THE PARAMETER 2 TO THE AXISES INSTEAD OF 1!!!
-
-
-
-
-
-	--end
-	
-	--[[
-	--beach the boat
-	if minetest.registered_nodes[minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z}).name].walkable == true and minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name == "air" then
-	--	print("stuck")
-		object:setacceleration({x=0,y=0,z=0})	
-		object:setvelocity({x=0,y=0,z=0})			
-	end
-	--stop it from flying away
-	if minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name == "air" and minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z}).name == "air" then
-		object:setacceleration({x=0,y=-10,z=0})
-	--	object:setvelocity({x=0,y=-2,z=0})
---		print("failuire")
-	end
-	--make it float
-	--if minetest.get_item_group(minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name, "water") ~= 0 and minetest.get_item_group(minetest.get_node({x=pos.x,y=pos.y+1,z=pos.z}).name, "water") == 0 then
-	--	object:setacceleration({x=x,y=2,z=z})
-	--end
-	--make it go down waterfalls
-	--if minetest.get_item_group(minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name, "water") ~= 0 and minetest.get_item_group(minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z}).name, "water") ~= 0 then
-	--	object:setacceleration({x=0,y=-2,z=0})
-	--end
-	--print(x.." "..y.." "..z)
-	--print(dump(node))
-	if param2 > 8 then
-		param2 = param2 - 9
-	end
-
-	--use this to copy
-	if minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name == "default:water_flowing" and minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).param2 < param2 then
-		x = x 
-		y = y 
-		z = z 
-	end
-	]]--
 	
 end
 
@@ -188,42 +109,6 @@ function boat.on_step(self, dtime)
 end
 
 minetest.register_entity("boat:boat", boat)
-
-
-
-
-
-
-
-
-
---when checking y = + 1 only check above
-
---make water go negative so that it can't be a giant floating tower of water
---negative water pulls down water above it, even moving the source block
-
---This is new water that flows with a fixed param2
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
